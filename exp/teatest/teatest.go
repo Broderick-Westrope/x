@@ -267,6 +267,11 @@ func (tm *TestModel) GetProgram() *tea.Program {
 	return tm.program
 }
 
+// GetModel gets the TestModel's inner model.
+func (tm *TestModel) GetModel() tea.Model {
+	return tm.model
+}
+
 // RequireEqualOutput is a helper function to assert the given output is
 // the expected from the golden files, printing its diff in case it is not.
 //
