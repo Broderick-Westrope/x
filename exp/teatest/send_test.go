@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Broderick-Westrope/x/exp/teatest"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/exp/teatest"
 )
 
 func TestAppSendToOtherProgram(t *testing.T) {
