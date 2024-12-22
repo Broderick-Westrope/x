@@ -221,6 +221,7 @@ func (tm *TestModel) waitDone(tb testing.TB, opts []FinalOpt) {
 type msgCaptureModel struct {
 	model  tea.Model
 	buffer *msgBuffer
+	tm     *TestModel
 }
 
 func (m msgCaptureModel) Init() tea.Cmd {
@@ -230,6 +231,7 @@ func (m msgCaptureModel) Init() tea.Cmd {
 func (m msgCaptureModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.buffer.append(msg)
 	model, cmd := m.model.Update(msg)
+	m.tm.model = model
 	if wrappedModel, ok := model.(msgCaptureModel); ok {
 		return wrappedModel, cmd
 	}
