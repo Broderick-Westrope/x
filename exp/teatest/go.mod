@@ -1,4 +1,4 @@
-module github.com/charmbracelet/x/exp/teatest
+module github.com/Broderick-Westrope/x/exp/teatest
 
 go 1.19
 
