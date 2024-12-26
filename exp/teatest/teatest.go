@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"regexp"
 	"sync"
 	"syscall"
 	"testing"
@@ -322,8 +323,26 @@ func (tm *TestModel) GetProgram() *tea.Program {
 // Important: this uses the system `diff` tool.
 //
 // You can update the golden files by running your tests with the -update flag.
-func RequireEqualOutput(tb testing.TB, out []byte) {
+func RequireEqualOutput(tb testing.TB, out []byte, opts ...CompareOption) {
 	tb.Helper()
+
+	// Process options
+	options := &CompareOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	// If we have patterns to ignore, process the output
+	if len(options.IgnorePatterns) > 0 {
+		outStr := string(out)
+		for _, pattern := range options.IgnorePatterns {
+			// Use regex to replace the pattern
+			re := regexp.MustCompile(pattern.Pattern)
+			outStr = re.ReplaceAllString(outStr, pattern.Replacement)
+		}
+		out = []byte(outStr)
+	}
+
 	golden.RequireEqual(tb, out)
 }
 
@@ -349,4 +368,28 @@ func (s *safeReadWriter) Write(p []byte) (int, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	return s.rw.Write(p) //nolint: wrapcheck
+}
+
+// IgnorePattern defines a pattern to ignore during output comparison
+type IgnorePattern struct {
+	Pattern     string // The pattern to match
+	Replacement string // What to replace it with
+}
+
+// CompareOptions defines options for output comparison
+type CompareOptions struct {
+	IgnorePatterns []IgnorePattern
+}
+
+// CompareOption is a functional option for comparison
+type CompareOption func(*CompareOptions)
+
+// WithReplacePattern adds a pattern to replace during comparison
+func WithReplacePattern(pattern string, replacement string) CompareOption {
+	return func(opts *CompareOptions) {
+		opts.IgnorePatterns = append(opts.IgnorePatterns, IgnorePattern{
+			Pattern:     pattern,
+			Replacement: replacement,
+		})
+	}
 }
